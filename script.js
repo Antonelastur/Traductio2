@@ -163,9 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (pdfUpload) {
         // Resetăm valoarea la click pentru a forța browserul să lanseze evenimentul 'change' 
         // chiar dacă utilizatorul selectează exact același fișier (dummy.pdf) de mai multe ori.
-        pdfUpload.addEventListener('click', function (e) {
-            e.stopPropagation();
-            this.value = null;
+        pdfUpload.addEventListener('click', function () {
+            this.value = '';
         });
 
         pdfUpload.addEventListener('change', async (e) => {

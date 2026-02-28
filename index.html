@@ -13,10 +13,6 @@
     <link rel="stylesheet" href="style.css">
     <!-- PDF.js via CDN + Worker Configuration -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        // Setare crucială pentru mediul online / GitHub Pages: indicăm clar locația Worker-ului compatibil
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
 </head>
 
 <body class="theme-general">
@@ -86,7 +82,8 @@
                     <div class="file-upload-wrapper">
                         <!-- Vizibilizat pentru a ocoli bug-urile de pe mobil/WebKit unde butoanele hidden sunt ignorate de sistemul de operare -->
                         <div style="margin-bottom: 8px;">
-                            <label for="pdfUpload" style="font-size: 0.85rem; color: var(--theme-accent);">Selectează
+                            <label id="pdfUploadLabel" for="pdfUpload"
+                                style="font-size: 0.85rem; color: var(--theme-accent);">Selectează
                                 fișierul de aici:</label>
                             <input type="file" id="pdfUpload" accept=".pdf,application/pdf"
                                 style="display: block; width: 100%; border: 1px dashed var(--theme-border); padding: 5px; border-radius: var(--radius-sm); color: var(--text-primary); cursor: pointer;" />
