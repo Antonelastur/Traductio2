@@ -150,20 +150,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // === PDF Extraction ===
+    // === PDF Extraction (with OCR fallback for scanned PDFs) ===
     if (pdfUpload) {
         console.log('[Traductio] PDF upload listener attached');
         pdfUpload.addEventListener('change', async (e) => {
             console.log('[Traductio] Change event fired');
             const file = e.target.files[0];
-            if (!file) {
-                console.log('[Traductio] No file selected');
-                return;
-            }
+            if (!file) return;
 
-            console.log('[Traductio] File:', file.name, 'Type:', file.type, 'Size:', file.size);
-
-            // Accept application/pdf, empty type (some browsers), or .pdf extension
             const isPdf = file.type === 'application/pdf' ||
                 file.type === '' ||
                 file.name.toLowerCase().endsWith('.pdf');
@@ -172,19 +166,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            showLoading("Extragere text din PDF...");
+            showLoading("Se încarcă PDF-ul...");
 
             try {
-                console.log('[Traductio] Reading arrayBuffer...');
                 const arrayBuffer = await file.arrayBuffer();
-                console.log('[Traductio] ArrayBuffer size:', arrayBuffer.byteLength);
                 const typedarray = new Uint8Array(arrayBuffer);
-
-                console.log('[Traductio] Calling pdfjsLib.getDocument...');
                 const loadingTask = pdfjsLib.getDocument({ data: typedarray });
                 const pdf = await loadingTask.promise;
                 console.log('[Traductio] PDF loaded, pages:', pdf.numPages);
 
+                // --- STEP 1: Try native text extraction ---
+                showLoading("Extragere text nativ...");
                 let extractedText = "";
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
@@ -201,22 +193,73 @@ document.addEventListener('DOMContentLoaded', () => {
                     extractedText += pageText + "\n\n";
                 }
 
-                console.log('[Traductio] Extracted text length:', extractedText.length);
+                const trimmedText = extractedText.trim();
+                console.log('[Traductio] Native text length:', trimmedText.length);
 
-                if (sourceText) {
-                    sourceText.value = extractedText.trim();
-                    sourceText.dispatchEvent(new Event('input'));
-                    console.log('[Traductio] Text set in textarea');
+                // --- STEP 2: If text is too short, fall back to OCR ---
+                if (trimmedText.length < 50) {
+                    console.log('[Traductio] Text prea scurt, se activează OCR...');
+
+                    if (typeof Tesseract === 'undefined') {
+                        alert('Biblioteca OCR (Tesseract.js) nu s-a încărcat. Reîncărcați pagina.');
+                        return;
+                    }
+
+                    showLoading(`OCR: Se procesează pagina 1 din ${pdf.numPages}...`);
+
+                    let ocrText = "";
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        showLoading(`OCR: Se procesează pagina ${i} din ${pdf.numPages}...`);
+                        console.log(`[Traductio] OCR pagina ${i}/${pdf.numPages}`);
+
+                        const page = await pdf.getPage(i);
+                        // Render at 2x scale for better OCR accuracy
+                        const scale = 2;
+                        const viewport = page.getViewport({ scale });
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+
+                        await page.render({ canvasContext: ctx, viewport }).promise;
+
+                        // Convert canvas to image data for Tesseract
+                        const imageData = canvas.toDataURL('image/png');
+
+                        const result = await Tesseract.recognize(imageData, 'ron+eng+spa', {
+                            logger: (m) => {
+                                if (m.status === 'recognizing text') {
+                                    const pct = Math.round(m.progress * 100);
+                                    showLoading(`OCR pagina ${i}/${pdf.numPages}: ${pct}%`);
+                                }
+                            }
+                        });
+
+                        ocrText += result.data.text + "\n\n";
+                    }
+
+                    console.log('[Traductio] OCR text length:', ocrText.length);
+
+                    if (sourceText) {
+                        sourceText.value = ocrText.trim();
+                        sourceText.dispatchEvent(new Event('input'));
+                    }
                 } else {
-                    console.error('[Traductio] sourceText element is null!');
+                    // Native text was sufficient
+                    if (sourceText) {
+                        sourceText.value = trimmedText;
+                        sourceText.dispatchEvent(new Event('input'));
+                    }
                 }
+
+                console.log('[Traductio] Done');
             } catch (error) {
-                console.error("[Traductio] Eroare PDF:", error);
+                console.error("[Traductio] Eroare PDF/OCR:", error);
                 alert(`Nu s-a putut extrage textul din PDF.\nEroare: ${error.message}`);
             } finally {
                 hideLoading();
                 e.target.value = '';
-                console.log('[Traductio] Done');
             }
         });
     } else {
