@@ -80,14 +80,11 @@
                     </div>
 
                     <div class="file-upload-wrapper">
-                        <!-- Vizibilizat pentru a ocoli bug-urile de pe mobil/WebKit unde butoanele hidden sunt ignorate de sistemul de operare -->
-                        <div style="margin-bottom: 8px;">
-                            <label id="pdfUploadLabel" for="pdfUpload"
-                                style="font-size: 0.85rem; color: var(--theme-accent);">Selectează
-                                fișierul de aici:</label>
-                            <input type="file" id="pdfUpload" accept=".pdf,application/pdf"
-                                style="display: block; width: 100%; border: 1px dashed var(--theme-border); padding: 5px; border-radius: var(--radius-sm); color: var(--text-primary); cursor: pointer;" />
-                        </div>
+                        <label for="pdfUpload" class="file-btn">
+                            <span>📎</span>
+                            <span class="btn-text">Încarcă PDF</span>
+                        </label>
+                        <input type="file" id="pdfUpload" accept=".pdf,application/pdf" class="hidden-input" />
                     </div>
                 </div>
 

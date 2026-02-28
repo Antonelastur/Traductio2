@@ -79,7 +79,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentDomain = newDomain;
 
                 // Switch body theme class
-                document.body.className = `theme-${newDomain}`;
+                document.body.classList.remove('theme-general', 'theme-juridic', 'theme-medical');
+                document.body.classList.add(`theme-${newDomain}`);
             });
         });
     }
@@ -138,9 +139,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 await navigator.clipboard.writeText(textToCopy);
-                copyBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" class="text-green-500"><path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+                copyBtn.innerHTML = `✅`;
                 setTimeout(() => {
-                    copyBtn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+                    copyBtn.innerHTML = `📋`;
                 }, 2000);
             } catch (err) {
                 console.error('Failed to copy text', err);
@@ -159,41 +160,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         pdfUpload.addEventListener('change', async (e) => {
             try {
-                if (sourceText) sourceText.value = "[Event Change] S-a selectat un fișier...";
                 const file = e.target.files[0];
 
-                if (!file) {
-                    if (sourceText) sourceText.value += "\nEroare: Niciun fișier nu a fost selectat (file este undefined).";
-                    return;
-                }
-
-                if (sourceText) sourceText.value += `\n2. Dimensiune: ${file.size} bytes`;
+                if (!file) return;
 
                 if (file.type !== 'application/pdf') {
-                    if (sourceText) sourceText.value += "\nEroare: Tipul fișierului nu este application/pdf.";
+                    alert("Eroare: Tipul fișierului nu este document PDF valabil.");
                     return;
                 }
 
                 showLoading("Extragere text din PDF...");
-                if (sourceText) sourceText.value += "\n3. Se citește ca ArrayBuffer...";
 
                 const arrayBuffer = await file.arrayBuffer();
-                if (sourceText) sourceText.value += "\n4. Conversie către Uint8Array...";
-
                 const typedarray = new Uint8Array(arrayBuffer);
-
-                if (sourceText) sourceText.value += `\n5. Trimis către getDocument. Mărime date: ${typedarray.length} bytes...`;
 
                 // Folosim un typed array pentru a asigura compatibilitatea universală cu getDocument
                 const loadingTask = pdfjsLib.getDocument({ data: typedarray });
-
                 const pdf = await loadingTask.promise;
-
-                if (sourceText) sourceText.value += `\n6. pdf.js a încărcat documentul. Are ${pdf.numPages} pagini.\nÎncepe extragerea...`;
 
                 let extractedText = "";
                 for (let i = 1; i <= pdf.numPages; i++) {
-                    if (sourceText) sourceText.value += `\n...Se extrage pagina ${i}`;
                     const page = await pdf.getPage(i);
                     const textContent = await page.getTextContent();
 
@@ -220,9 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 hideLoading();
             } catch (error) {
                 console.error("Eroare gravă PDF:", error);
-                if (sourceText) {
-                    sourceText.value += `\n!!! EROARE CRITICĂ FATALĂ:\nNume eroare: ${error.name}\nMesaj eroare: ${error.message}\nStack trace: ${error.stack}`;
-                }
+                alert("A apărut o eroare la extragerea textului din PDF.");
                 hideLoading();
             } finally {
                 e.target.value = ''; // Reset file input
