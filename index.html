@@ -85,21 +85,13 @@
                     </div>
 
                     <div class="file-upload-wrapper">
-                        <input type="file" id="pdfUpload" accept=".pdf,application/pdf" style="display: none;" />
-                        <label for="pdfUpload" class="file-btn" id="pdfUploadLabel" title="Încarcă fișier PDF">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M14 2v6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M12 18v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                                <path d="M9 15l3-3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" />
-                            </svg>
-                            <span class="btn-text">PDF Document</span>
-                        </label>
+                        <!-- Vizibilizat pentru a ocoli bug-urile de pe mobil/WebKit unde butoanele hidden sunt ignorate de sistemul de operare -->
+                        <div style="margin-bottom: 8px;">
+                            <label for="pdfUpload" style="font-size: 0.85rem; color: var(--theme-accent);">Selectează
+                                fișierul de aici:</label>
+                            <input type="file" id="pdfUpload" accept=".pdf,application/pdf"
+                                style="display: block; width: 100%; border: 1px dashed var(--theme-border); padding: 5px; border-radius: var(--radius-sm); color: var(--text-primary); cursor: pointer;" />
+                        </div>
                     </div>
                 </div>
 
