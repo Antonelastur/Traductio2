@@ -169,7 +169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         pdfUpload.addEventListener('change', async (e) => {
-            e.preventDefault();
             e.stopPropagation();
 
             try {
