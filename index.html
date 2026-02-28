@@ -11,12 +11,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="style.css">
-    <!-- PDF.js via CDN (Fără WebWorker extern pentru a evita blocaje CORS pe Localhost) -->
+    <!-- PDF.js via CDN + Worker Configuration -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
-        // Setare crucială: forțăm PDF.js să ruleze "fake worker" pe firul principal
-        // Asta rezolvă eroarea silențioasă de securitate a browserelor (CORS / Cross-Origin pe Worker)
-        pdfjsLib.GlobalWorkerOptions.workerSrc = ''; 
+        // Setare crucială pentru mediul online / GitHub Pages: indicăm clar locația Worker-ului compatibil
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     </script>
 </head>
 
