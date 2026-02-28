@@ -161,6 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === PDF Extraction ===
     if (pdfUpload) {
+        // Resetăm valoarea la click pentru a forța browserul să lanseze evenimentul 'change' 
+        // chiar dacă utilizatorul selectează exact același fișier (dummy.pdf) de mai multe ori.
+        pdfUpload.addEventListener('click', function () {
+            this.value = null;
+        });
+
         pdfUpload.addEventListener('change', async (e) => {
             try {
                 if (sourceText) sourceText.value = "[Event Change] S-a selectat un fișier...";
