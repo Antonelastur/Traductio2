@@ -168,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                if (sourceText) sourceText.value += `\nNume fișier: ${file.name} | Tip: ${file.type} | Dimensiune: ${file.size} bytes`;
+                if (sourceText) sourceText.value += `\n2. Dimensiune: ${file.size} bytes`;
 
                 if (file.type !== 'application/pdf') {
                     if (sourceText) sourceText.value += "\nEroare: Tipul fișierului nu este application/pdf.";
@@ -176,24 +176,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 showLoading("Extragere text din PDF...");
-                if (sourceText) sourceText.value += "\nCitirea ca ArrayBuffer...";
+                if (sourceText) sourceText.value += "\n3. Se citește ca ArrayBuffer...";
 
                 const arrayBuffer = await file.arrayBuffer();
+                if (sourceText) sourceText.value += "\n4. Conversie către Uint8Array...";
+
                 const typedarray = new Uint8Array(arrayBuffer);
 
-                if (sourceText) sourceText.value += `\nArrayBuffer citit cu succes. Mărime: ${typedarray.length} bytes.\nTrimitere către pdf.js...`;
+                if (sourceText) sourceText.value += `\n5. Trimis către getDocument. Mărime date: ${typedarray.length} bytes...`;
 
                 // Folosim un typed array pentru a asigura compatibilitatea universală cu getDocument
-                const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                const loadingTask = pdfjsLib.getDocument({ data: typedarray });
 
-                if (sourceText) sourceText.value += `\npdf.js a încărcat documentul. Pagini: ${pdf.numPages}\nÎncepe extragerea...`;
+                const pdf = await loadingTask.promise;
+
+                if (sourceText) sourceText.value += `\n6. pdf.js a încărcat documentul. Are ${pdf.numPages} pagini.\nÎncepe extragerea...`;
 
                 let extractedText = "";
                 for (let i = 1; i <= pdf.numPages; i++) {
+                    if (sourceText) sourceText.value += `\n...Se extrage pagina ${i}`;
                     const page = await pdf.getPage(i);
                     const textContent = await page.getTextContent();
 
-                    // Varianta mai robustă de extragere a textului pentru a păstra formatarea de linii
+                    // Varianta mai robustă de extragere a textului
                     let lastY = -1;
                     let pageText = "";
 
@@ -215,9 +220,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 hideLoading();
             } catch (error) {
-                console.error("Eroare la extragerea PDF-ului:", error);
+                console.error("Eroare gravă PDF:", error);
                 if (sourceText) {
-                    sourceText.value = "A apărut o eroare la extragerea textului din PDF:\n" + (error.message || error);
+                    sourceText.value += `\n!!! EROARE CRITICĂ FATALĂ:\nNume eroare: ${error.name}\nMesaj eroare: ${error.message}\nStack trace: ${error.stack}`;
                 }
                 hideLoading();
             } finally {
