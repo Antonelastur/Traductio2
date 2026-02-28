@@ -152,11 +152,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === PDF Extraction ===
     if (pdfUpload) {
+        console.log('[Traductio] PDF upload listener attached');
         pdfUpload.addEventListener('change', async (e) => {
+            console.log('[Traductio] Change event fired');
             const file = e.target.files[0];
-            if (!file) return;
+            if (!file) {
+                console.log('[Traductio] No file selected');
+                return;
+            }
 
-            if (file.type !== 'application/pdf') {
+            console.log('[Traductio] File:', file.name, 'Type:', file.type, 'Size:', file.size);
+
+            // Accept application/pdf, empty type (some browsers), or .pdf extension
+            const isPdf = file.type === 'application/pdf' ||
+                file.type === '' ||
+                file.name.toLowerCase().endsWith('.pdf');
+            if (!isPdf) {
                 alert('Te rugăm să selectezi un fișier PDF valid.');
                 return;
             }
@@ -164,10 +175,15 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoading("Extragere text din PDF...");
 
             try {
+                console.log('[Traductio] Reading arrayBuffer...');
                 const arrayBuffer = await file.arrayBuffer();
+                console.log('[Traductio] ArrayBuffer size:', arrayBuffer.byteLength);
                 const typedarray = new Uint8Array(arrayBuffer);
+
+                console.log('[Traductio] Calling pdfjsLib.getDocument...');
                 const loadingTask = pdfjsLib.getDocument({ data: typedarray });
                 const pdf = await loadingTask.promise;
+                console.log('[Traductio] PDF loaded, pages:', pdf.numPages);
 
                 let extractedText = "";
                 for (let i = 1; i <= pdf.numPages; i++) {
@@ -185,18 +201,26 @@ document.addEventListener('DOMContentLoaded', () => {
                     extractedText += pageText + "\n\n";
                 }
 
+                console.log('[Traductio] Extracted text length:', extractedText.length);
+
                 if (sourceText) {
                     sourceText.value = extractedText.trim();
                     sourceText.dispatchEvent(new Event('input'));
+                    console.log('[Traductio] Text set in textarea');
+                } else {
+                    console.error('[Traductio] sourceText element is null!');
                 }
             } catch (error) {
-                console.error("Eroare PDF:", error);
+                console.error("[Traductio] Eroare PDF:", error);
                 alert(`Nu s-a putut extrage textul din PDF.\nEroare: ${error.message}`);
             } finally {
                 hideLoading();
                 e.target.value = '';
+                console.log('[Traductio] Done');
             }
         });
+    } else {
+        console.error('[Traductio] pdfUpload element NOT found!');
     }
 
     // === Translation Logic ===
