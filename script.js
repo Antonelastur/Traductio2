@@ -152,29 +152,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === PDF Extraction ===
     if (pdfUpload) {
-        // Resetăm valoarea la click pentru a forța browserul să lanseze evenimentul 'change' 
-        // chiar dacă utilizatorul selectează exact același fișier (dummy.pdf) de mai multe ori.
-        pdfUpload.addEventListener('click', function () {
-            this.value = '';
-        });
-
         pdfUpload.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type !== 'application/pdf') {
+                alert('Te rugăm să selectezi un fișier PDF valid.');
+                return;
+            }
+
+            showLoading("Extragere text din PDF...");
+
             try {
-                const file = e.target.files[0];
-
-                if (!file) return;
-
-                if (file.type !== 'application/pdf') {
-                    alert("Eroare: Tipul fișierului nu este document PDF valabil.");
-                    return;
-                }
-
-                showLoading("Extragere text din PDF...");
-
                 const arrayBuffer = await file.arrayBuffer();
                 const typedarray = new Uint8Array(arrayBuffer);
-
-                // Folosim un typed array pentru a asigura compatibilitatea universală cu getDocument
                 const loadingTask = pdfjsLib.getDocument({ data: typedarray });
                 const pdf = await loadingTask.promise;
 
@@ -182,11 +173,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let i = 1; i <= pdf.numPages; i++) {
                     const page = await pdf.getPage(i);
                     const textContent = await page.getTextContent();
-
-                    // Varianta mai robustă de extragere a textului
                     let lastY = -1;
                     let pageText = "";
-
                     for (let item of textContent.items) {
                         if (lastY !== item.transform[5] && lastY !== -1) {
                             pageText += "\n";
@@ -199,17 +187,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (sourceText) {
                     sourceText.value = extractedText.trim();
-                    // Declanșăm evenimentul input manual pentru a actualiza numărul de caractere
                     sourceText.dispatchEvent(new Event('input'));
                 }
-
-                hideLoading();
             } catch (error) {
-                console.error("Eroare gravă PDF:", error);
-                alert("A apărut o eroare la extragerea textului din PDF.");
-                hideLoading();
+                console.error("Eroare PDF:", error);
+                alert(`Nu s-a putut extrage textul din PDF.\nEroare: ${error.message}`);
             } finally {
-                e.target.value = ''; // Reset file input
+                hideLoading();
+                e.target.value = '';
             }
         });
     }
