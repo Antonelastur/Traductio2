@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ro">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traductio | JURIDIC & MEDICAL</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <!-- PDF.js via CDN (Fără WebWorker extern pentru a evita blocaje CORS pe Localhost) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        // Setare crucială: forțăm PDF.js să ruleze "fake worker" pe firul principal
+        // Asta rezolvă eroarea silențioasă de securitate a browserelor (CORS / Cross-Origin pe Worker)
+        pdfjsLib.GlobalWorkerOptions.workerSrc = ''; 
+    </script>
+</head>
+
+<body class="theme-general">
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="hidden">
+        <div class="spinner"></div>
+        <p id="loadingText">Se procesează...</p>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="app-container">
+
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="logo-area">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" class="brand-icon">
+                    <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2"
+                        stroke-linejoin="round" />
+                    <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                    <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                <h1>Traductio</h1>
+            </div>
+
+            <!-- DOMAIN SELECTOR (PRIORITY 1) -->
+            <div class="domain-selector">
+                <button class="domain-btn active" data-domain="general" title="Domeniu General">
+                    <span class="icon">📄</span> <span class="text">GENERAL</span>
+                </button>
+                <button class="domain-btn" data-domain="juridic" title="Domeniu Juridic (Contracte, Legi, etc.)">
+                    <span class="icon">⚖️</span> <span class="text">JURIDIC</span>
+                </button>
+                <button class="domain-btn" data-domain="medical" title="Domeniu Medical (Fișe, Diagnostice, etc.)">
+                    <span class="icon">🏥</span> <span class="text">MEDICAL</span>
+                </button>
+            </div>
+
+            <div class="header-actions">
+                <button id="settingsBtn" class="icon-btn" title="Setări (API Key)">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2" />
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                            stroke="currentColor" stroke-width="2" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- WORKSPACE -->
+        <main class="workspace">
+
+            <!-- SOURCE PANEL -->
+            <section class="panel source-panel">
+                <div class="panel-header">
+                    <div class="lang-selector">
+                        <select id="sourceLang" class="lang-dropdown">
+                            <option value="RO">Română</option>
+                            <option value="ES">Spaniolă</option>
+                            <option value="EN">Engleză</option>
+                        </select>
+                    </div>
+
+                    <div class="file-upload-wrapper">
+                        <input type="file" id="pdfUpload" accept=".pdf,application/pdf" style="display: none;" />
+                        <label for="pdfUpload" class="file-btn" id="pdfUploadLabel" title="Încarcă fișier PDF">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                                    stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M14 2v6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M12 18v-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M9 15l3-3 3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                            </svg>
+                            <span class="btn-text">PDF Document</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="textarea-wrapper">
+                    <textarea id="sourceText"
+                        placeholder="Introduceți textul aici sau încărcați un fișier PDF..."></textarea>
+                    <div class="char-count"><span id="charCountNum">0</span> caractere</div>
+                </div>
+            </section>
+
+            <!-- ACTION CENTER (Translate Button) -->
+            <div class="action-center">
+                <button id="translateBtn" class="primary-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14"></path>
+                        <path d="M12 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- TARGET PANEL -->
+            <section class="panel target-panel">
+                <div class="panel-header">
+                    <div class="lang-selector">
+                        <select id="targetLang" class="lang-dropdown">
+                            <option value="ES">Spaniolă</option>
+                            <option value="EN">Engleză</option>
+                            <option value="RO">Română</option>
+                        </select>
+                    </div>
+
+                    <div class="panel-controls">
+                        <button id="copyBtn" class="icon-btn tooltip" data-tooltip="Copiază textul">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="textarea-wrapper glass">
+                    <div id="targetText" class="translated-content" contenteditable="true"
+                        aria-placeholder="Traducerea va apărea aici..."></div>
+                </div>
+
+                <!-- Translation Memory Insights -->
+                <div class="tm-insights hidden" id="tmInsights">
+                    <div class="tm-header">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span>Match-uri TM găsite:</span>
+                    </div>
+                    <ul id="tmMatchList" class="tm-list"></ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Setări Traductio</h2>
+                <button id="closeModalBtn" class="icon-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="apiKeyInput">Google Gemini API Key</label>
+                    <input type="password" id="apiKeyInput" placeholder="AIZAy...">
+                    <small>Cheia este salvată local în navigatorul dvs. (localStorage).</small>
+                </div>
+
+                <div class="form-group tm-stats-group">
+                    <label>Translation Memory Status</label>
+                    <div class="tm-stats">
+                        <span id="tmEntriesCount">0 intrări salvate</span>
+                        <button id="clearTmBtn" class="danger-btn text-sm">Șterge memoria TM</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="saveSettingsBtn" class="primary-btn fluid">Salvează Setările</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="glossaries.js"></script>
+    <script src="translation-memory.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
