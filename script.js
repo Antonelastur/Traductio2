@@ -87,6 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // === Settings Modal Logic ===
     if (settingsBtn) {
         settingsBtn.addEventListener('click', () => {
+            // Reîncărcăm vizual cheia de fiecare dată când se deschide modalul
+            // deoarece browserele au tendința să golească câmpurile type="password" la scurt timp după page load
+            if (apiKeyInput) apiKeyInput.value = localStorage.getItem('traductio_api_key') || apiKey;
             if (settingsModal) settingsModal.classList.remove('hidden');
             updateTmStats();
         });
@@ -252,7 +255,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function callGemini(text, domain, sourceLang, targetLang, tmContext, glossaryContext) {
-        if (!apiKey) {
+        // Redownload the key from localStorage dynamically as a fail-safe
+        const currentKey = localStorage.getItem('traductio_api_key') || apiKey;
+
+        if (!currentKey) {
             throw new Error("API_KEY_MISSING");
         }
 
@@ -282,7 +288,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${currentKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestBody)
