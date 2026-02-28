@@ -4,6 +4,12 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    // === PDF.js Worker Configuration ===
+    if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+    }
+
     // === Global Error Catcher for Debugging ===
     window.onerror = function (msg, url, line, col, error) {
         const text = document.getElementById('sourceText');
