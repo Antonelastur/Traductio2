@@ -139,6 +139,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // === PDF Upload Button Click Handler ===
+    const pdfUploadLabel = document.getElementById('pdfUploadLabel');
+    if (pdfUploadLabel && pdfUpload) {
+        pdfUploadLabel.addEventListener('click', (e) => {
+            // Prevent default label behavior which might double-fire
+            e.preventDefault();
+            // Explicitly trigger the invisible file input
+            pdfUpload.click();
+        });
+    }
+
     // === PDF Extraction ===
     if (pdfUpload) {
         pdfUpload.addEventListener('change', async (e) => {
