@@ -77,7 +77,7 @@
             <section class="panel source-panel">
                 <div class="panel-header">
                     <div class="lang-selector">
-                        <select id="sourceLang" class="lang-dropdown">
+                        <select id="sourceLang" class="lang-dropdown" aria-label="Limba sursă">
                             <option value="RO">Română</option>
                             <option value="ES">Spaniolă</option>
                             <option value="EN">Engleză</option>
@@ -112,7 +112,7 @@
 
             <!-- ACTION CENTER (Translate Button) -->
             <div class="action-center">
-                <button id="translateBtn" class="primary-btn">
+                <button id="translateBtn" class="primary-btn" aria-label="Tradu">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M5 12h14"></path>
                         <path d="M12 5l7 7-7 7"></path>
@@ -124,7 +124,7 @@
             <section class="panel target-panel">
                 <div class="panel-header">
                     <div class="lang-selector">
-                        <select id="targetLang" class="lang-dropdown">
+                        <select id="targetLang" class="lang-dropdown" aria-label="Limba țintă">
                             <option value="ES">Spaniolă</option>
                             <option value="EN">Engleză</option>
                             <option value="RO">Română</option>
@@ -132,7 +132,8 @@
                     </div>
 
                     <div class="panel-controls">
-                        <button id="copyBtn" class="icon-btn tooltip" data-tooltip="Copiază textul">
+                        <button id="copyBtn" class="icon-btn tooltip" data-tooltip="Copiază textul"
+                            aria-label="Copiază textul">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke="currentColor"
                                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -145,7 +146,7 @@
 
                 <div class="textarea-wrapper glass">
                     <div id="targetText" class="translated-content" contenteditable="true"
-                        aria-placeholder="Traducerea va apărea aici..."></div>
+                        data-placeholder="Traducerea va apărea aici..."></div>
                 </div>
 
                 <!-- Translation Memory Insights -->
@@ -169,7 +170,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Setări Traductio</h2>
-                <button id="closeModalBtn" class="icon-btn">
+                <button id="closeModalBtn" class="icon-btn" aria-label="Închide fereastra de setări">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                             stroke-linejoin="round" />
