@@ -148,16 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // === PDF Upload Button Click Handler ===
-    const pdfUploadLabel = document.getElementById('pdfUploadLabel');
-    if (pdfUploadLabel && pdfUpload) {
-        pdfUploadLabel.addEventListener('click', (e) => {
-            // Prevent default label behavior which might double-fire
-            e.preventDefault();
-            // Explicitly trigger the invisible file input
-            pdfUpload.click();
-        });
-    }
 
     // === PDF Extraction ===
     if (pdfUpload) {
@@ -168,8 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         pdfUpload.addEventListener('change', async (e) => {
-            e.stopPropagation();
-
             try {
                 if (sourceText) sourceText.value = "[Event Change] S-a selectat un fișier...";
                 const file = e.target.files[0];
